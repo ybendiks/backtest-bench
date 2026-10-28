@@ -1,8 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Backtest Bench</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+img{max-width:100%}
 /* Layout: data-source band on top → strategy cards (rules, settings and headline result) → test setup bar → results table, charts, trades → methods */
 :root{
   --bg:#f3f5f8; --panel:#ffffff; --ink:#152130; --muted:#5d6b7c; --line:#dbe1e9; --soft:#eaeef4;
@@ -34,15 +42,52 @@ h3{font-family:var(--f-display);font-weight:600;font-size:17px;margin:0}
 
 /* Data source band */
 .band{background:var(--band);color:var(--band-ink)}
-.band .in{padding-block:28px 26px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px 40px;align-items:end}
+.band .in{padding-block:28px 26px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px 40px;align-items:start}
 @media (max-width:860px){.band .in{grid-template-columns:minmax(0,1fr)}}
 .band .eyebrow{color:var(--band-muted)}
 .band p.lede{color:var(--band-muted);margin:10px 0 0;max-width:58ch;font-size:15px}
 .powered{display:inline-flex;align-items:center;gap:10px;margin-bottom:14px;padding:6px 12px 6px 8px;border-radius:999px;background:color-mix(in srgb, var(--band-ink) 10%, transparent);border:1px solid color-mix(in srgb, var(--band-ink) 22%, transparent);font-weight:600;font-size:13px}
 .mlogo{display:inline-block;height:auto;max-width:100%}
 .demo{margin:14px 0 0;padding:10px 12px;border-radius:8px;background:color-mix(in srgb, #ffd28a 16%, transparent);border:1px solid color-mix(in srgb, #ffd28a 45%, transparent);color:var(--band-ink);font-size:13.5px;max-width:58ch}
-.source select{background:transparent;color:var(--band-ink);border-color:color-mix(in srgb, var(--band-ink) 30%, transparent);font-family:var(--f-mono);font-size:12.5px;padding:2px 6px;width:auto}
-.source select option{color:#152130}
+.src-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.pill{font-family:var(--f-mono);font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid color-mix(in srgb, var(--band-ink) 25%, transparent);color:var(--band-muted)}
+.pill.on{color:#8fe3b5;border-color:color-mix(in srgb, #46d38f 55%, transparent)}
+.source input{background:color-mix(in srgb, var(--band-ink) 8%, transparent);color:var(--band-ink);border-color:color-mix(in srgb, var(--band-ink) 28%, transparent)}
+.source input::placeholder{color:var(--band-muted)}
+.source input[type=date]{color-scheme:dark}
+.source label{font-size:12px;color:var(--band-muted)}
+.connect{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.connect-title{font-size:15px;font-weight:600;color:var(--band-ink);font-family:var(--f-display)}
+.grid2{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:8px}
+.source label{display:block;margin-bottom:3px}
+.source label.chk{display:inline-flex;margin:0}
+.minilabel{font-size:12px;color:var(--band-muted);margin-bottom:6px}
+#firstTicker,#addTicker{font-family:var(--f-mono);text-transform:uppercase}
+#firstTicker::placeholder,#addTicker::placeholder{text-transform:none}
+.inrow{display:flex;gap:8px}
+.inrow input{flex:1;min-width:0}
+.inrow button{flex:none}
+.chk{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.hint{margin:0;font-size:12.5px;color:var(--band-muted)}
+.hint a{color:var(--band-ink)}
+.mgr{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:stretch;border:1px solid color-mix(in srgb, var(--band-ink) 28%, transparent);border-radius:999px;overflow:hidden}
+.chip button{background:transparent;border:0;border-radius:0;color:var(--band-ink);font-family:var(--f-mono);font-size:12.5px;font-weight:500;padding:4px 4px 4px 11px}
+.chip button.x{padding:4px 9px 4px 5px;color:var(--band-muted);font-family:var(--f-body)}
+.chip.active{background:var(--band-ink);border-color:var(--band-ink)}
+.chip.active button{color:var(--band)}
+.quick{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:var(--band-muted)}
+.quick button{background:transparent;border:1px dashed color-mix(in srgb, var(--band-ink) 30%, transparent);color:var(--band-muted);font-family:var(--f-mono);font-size:11.5px;font-weight:500;padding:2px 8px;border-radius:999px}
+.range{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end}
+@media (max-width:420px){.range{grid-template-columns:1fr 1fr}.range button{grid-column:1/-1}}
+.source button:not(.primary){background:color-mix(in srgb, var(--band-ink) 10%, transparent);border-color:color-mix(in srgb, var(--band-ink) 25%, transparent);color:var(--band-ink)}
+.source .chip button, .source .quick button{background:transparent}
+.source .chip.active button{background:transparent;color:var(--band)}
+.status{margin:10px 0 0;font-size:12.5px;min-height:1.2em;color:var(--band-muted)}
+.status.s-err{color:#ffb4ac} .status.s-ok{color:#8fe3b5}
+.linkbtn{margin-top:10px;background:none!important;border:0!important;padding:0;font-weight:500;font-size:12px;color:var(--band-muted)!important;text-decoration:underline;cursor:pointer}
+button:disabled{opacity:.55;cursor:progress}
 .powered .live{width:8px;height:8px;border-radius:50%;background:#46d38f;box-shadow:0 0 0 3px color-mix(in srgb, #46d38f 30%, transparent)}
 .source{border:1px solid color-mix(in srgb, var(--band-ink) 20%, transparent);border-radius:10px;padding:14px 16px;min-width:0}
 .source dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 16px;margin:10px 0 0;font-size:13px}
@@ -127,6 +172,8 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:
 footer{padding-block:28px 40px;color:var(--muted);font-size:12.5px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+</head>
+<body>
 
 <section class="band">
   <div class="in">
@@ -134,19 +181,40 @@ footer{padding-block:28px 40px;color:var(--muted);font-size:12.5px}
       <div class="powered"><span class="live"></span><span>Powered by</span><img class="mlogo" src="data:image/png;base64,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" alt="Massive" width="111" height="13"><span>market data</span></div>
       <h1>Backtest Bench</h1>
       <p class="lede">Three classic trading strategies, tested bar by bar on daily prices pulled from the Massive Stocks API and compared against simply buying and holding.</p>
-      <p class="demo" id="demoNote" hidden><b>Demo mode:</b> these are simulated prices. Run the setup in the README to pull real data from Massive with your own API key.</p>
+      <p class="demo" id="demoNote" hidden><b>Demo mode:</b> these are simulated prices. Connect your Massive API key to test real tickers.</p>
     </div>
     <div class="source" aria-label="Data source">
-      <div class="eyebrow">Data source</div>
+      <div class="src-head"><span class="eyebrow">Data source</span><span class="pill" id="connState">Demo data</span></div>
+      <form class="connect" id="connectForm" autocomplete="off">
+        <div class="connect-title" id="connectLabel">Connect your Massive account</div>
+        <div class="grid2">
+          <div><label for="apiKey">Massive API key</label><input id="apiKey" type="password" placeholder="Paste your key" spellcheck="false"></div>
+          <div><label for="firstTicker">Ticker to test</label><input id="firstTicker" value="SPY" spellcheck="false" autocapitalize="characters"></div>
+        </div>
+        <button type="submit" class="primary" id="connectBtn">Connect and test</button>
+        <label class="chk"><input type="checkbox" id="rememberKey" checked> Remember on this computer</label>
+        <p class="hint">No key yet? <a href="https://massive.com/dashboard/signup" target="_blank" rel="noopener">Sign up free</a>, then copy it from <a href="https://massive.com/dashboard/keys" target="_blank" rel="noopener">your keys page</a>. The key is sent only to Massive and saved only in this browser.</p>
+      </form>
+      <div class="mgr" id="dataMgr" hidden>
+        <form id="addForm" autocomplete="off"><label for="addTicker">Ticker to test</label><div class="inrow"><input id="addTicker" placeholder="Type a symbol, e.g. NVDA" spellcheck="false" autocapitalize="characters"><button type="submit" class="primary" id="addBtn">Test</button></div></form>
+        <div><div class="minilabel">Your tickers · click one to switch</div><div class="chips" id="chips" aria-label="Your tickers"></div></div>
+        <div class="quick" id="quick"></div>
+        <div class="range">
+          <div><label for="pullFrom">History from</label><input type="date" id="pullFrom"></div>
+          <div><label for="pullTo">To</label><input type="date" id="pullTo"></div>
+          <button type="button" id="refreshBtn">Update all</button>
+        </div>
+      </div>
+      <p class="status" id="status" role="status"></p>
       <dl>
         <dt>Provider</dt><dd id="srcProvider"><img class="mlogo" src="data:image/png;base64,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" alt="Massive" width="92" height="11" style="vertical-align:-1px"> &nbsp;Stocks REST API</dd>
         <dt>Endpoint</dt><dd class="ep" id="srcEndpoint">–</dd>
-        <dt id="mTickerDt" hidden>Ticker</dt><dd id="mTickerDd" hidden><select id="mTicker" aria-label="Ticker"></select></dd>
         <dt>Bars</dt><dd id="srcBars">–</dd>
         <dt>Coverage</dt><dd id="srcRange">–</dd>
         <dt>Adjustment</dt><dd id="srcAdj">Split-adjusted OHLC (adjusted=true)</dd>
         <dt>Pulled</dt><dd id="srcPulled">–</dd>
       </dl>
+      <button type="button" class="linkbtn" id="disconnect" hidden>Disconnect and clear saved data</button>
     </div>
   </div>
 </section>
@@ -154,7 +222,7 @@ footer{padding-block:28px 40px;color:var(--muted);font-size:12.5px}
 <div class="in">
   <section class="sect">
     <div class="sect-head">
-      <h2>The strategies</h2>
+      <h2 id="stratTitle">The strategies</h2>
       <span class="note" id="windowNote"></span>
     </div>
     <div class="cards" id="cards"></div>
@@ -215,7 +283,7 @@ footer{padding-block:28px 40px;color:var(--muted);font-size:12.5px}
         </ul>
       </div>
       <div class="box">
-        <h3>Load your own file</h3>
+        <h3>Load a file instead</h3>
         <p class="note" style="margin-top:6px">Load a CSV from the script below, a Massive aggregates JSON response, or a Massive flat-file day aggregates file.</p>
         <div class="stackv" style="gap:10px;margin-top:10px">
           <input type="file" id="fileIn" accept=".csv,.json,.txt" aria-label="Load a CSV or JSON file">
@@ -223,7 +291,7 @@ footer{padding-block:28px 40px;color:var(--muted);font-size:12.5px}
           <div id="tickerWrap" hidden><label for="tickerSel" class="note">Ticker in file</label><select id="tickerSel"></select></div>
           <div style="display:flex;flex-wrap:wrap;gap:8px">
             <button type="button" class="primary" id="loadPaste">Load pasted data</button>
-            <button type="button" id="loadSpy">Reset data</button>
+            <button type="button" id="loadSpy">Back to Massive data</button>
           </div>
           <ul class="checks" id="checks"></ul>
           <p class="note">To pull more tickers from Massive, run the setup again (see the README).</p>
@@ -357,6 +425,7 @@ function cleanBars(rows){
 function setData(bars, ticker, checks, meta){
   if(bars.length<30){ showError('Fewer than 30 valid bars. Load a longer history.'); return; }
   BARS=bars; TICKER=ticker||'Loaded';
+  $('#stratTitle').textContent = meta.kind==='demo' ? 'The strategies, on simulated prices' : `The strategies, tested on ${TICKER}`;
   const first=fmtD(bars[0].t), last=fmtD(bars[bars.length-1].t), demo=meta.kind==='demo';
   $('#demoNote').hidden=!demo;
   $('#srcProvider').innerHTML = demo ? 'Simulated prices (no Massive data loaded yet)' : PROVIDER_HTML;
@@ -379,9 +448,7 @@ function loadRaw(raw){
   else { $('#tickerWrap').hidden=true; const {bars,checks}=cleanBars(raw.rows); setData(bars, raw.tickers[0]||'Loaded', checks, {kind:'file'}); }
 }
 function pickTicker(tk){ $('#tickerSel').value=tk; const {bars,checks}=cleanBars(RAW.rows.filter(r=>r.ticker===tk)); setData(bars,tk,checks,{kind:'file'}); }
-const MD = (window.MASSIVE_DATA && window.MASSIVE_DATA.tickers && Object.keys(window.MASSIVE_DATA.tickers).length) ? window.MASSIVE_DATA : null;
 const PROVIDER_HTML = $('#srcProvider').innerHTML;
-function loadMassive(tk){ const d=MD.tickers[tk]; const {bars,checks}=cleanBars(d.bars.map(([t,o,h,l,c])=>({t,o,h,l,c}))); $('#tickerWrap').hidden=true; $('#mTicker').value=tk; setData(bars,tk,checks,{kind:'massive',endpoint:d.endpoint,pulled:MD.pulled}); }
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 function simulate(){
   const rnd=mulberry32(7351), g=()=>{let u=0;while(!u)u=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*rnd())};
@@ -394,8 +461,109 @@ function simulate(){
     t+=DAY; }
   return out; }
 function loadDemo(){ const {bars,checks}=cleanBars(simulate()); $('#tickerWrap').hidden=true; setData(bars,'SIM',checks,{kind:'demo'}); }
-function loadSpy(){ if(MD){ const ks=Object.keys(MD.tickers); loadMassive(ks.includes('SPY')?'SPY':ks[0]); } else loadDemo(); }
-if(MD){ $('#mTicker').innerHTML=Object.keys(MD.tickers).map(t=>`<option>${t}</option>`).join(''); $('#mTickerDt').hidden=$('#mTickerDd').hidden=false; $('#mTicker').onchange=ev=>loadMassive(ev.target.value); }
+/* ---------- Massive connection (runs in the browser) ---------- */
+const API='https://api.massive.com';
+const LS={ get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ return false; } },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} } };
+let KEY = LS.get('bb.key') || '';
+let STORE = LS.get('bb.data') || {order:[], tickers:{}};
+let ACTIVE = LS.get('bb.active') || '';
+let BUSY = false;
+if(window.MASSIVE_DATA && window.MASSIVE_DATA.tickers){   // optional: data saved by get_data.py
+  for(const [t,d] of Object.entries(window.MASSIVE_DATA.tickers)){ if(!STORE.tickers[t]){ STORE.tickers[t]={...d, pulled:window.MASSIVE_DATA.pulled}; STORE.order.push(t); } } }
+const QUICK=['SPY','QQQ','AAPL','NVDA','MSFT','TSLA','AMZN','IWM'];
+const today=()=>new Date().toISOString().slice(0,10);
+function defaultRange(){ const r=LS.get('bb.range'); if(r&&r.from&&r.to) return r; const t=new Date(); const f=new Date(t.getTime()-730*DAY); return {from:fmtD(f.getTime()), to:fmtD(t.getTime())}; }
+function saveStore(){ if(!LS.set('bb.data',STORE)) setStatus('Your browser is not saving data between visits, so tickers will need to be pulled again next time.','err'); }
+function setStatus(msg,kind){ const el=$('#status'); el.textContent=msg||''; el.className='status'+(kind?' s-'+kind:''); }
+class UserErr extends Error{}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function massiveGet(url){
+  for(let attempt=0; attempt<6; attempt++){
+    let r;
+    try{ r=await fetch(url+(url.includes('?')?'&':'?')+'apiKey='+encodeURIComponent(KEY)); }
+    catch(e){ throw new UserErr("Your browser couldn't reach Massive. Check your internet connection and try again."); }
+    if(r.status===429){ for(let s=20;s>0;s--){ setStatus(`Massive's free plan allows about 5 requests a minute. Trying again in ${s}s…`); await sleep(1000); } continue; }
+    let j=null; try{ j=await r.json(); }catch(e){}
+    const msg=j&&(j.message||j.error);
+    if(r.status===401) throw new UserErr("Massive didn't accept this API key. Copy it again from your keys page and reconnect.");
+    if(r.status===403) throw new UserErr(`Massive declined the request${msg?': '+msg:''}. Free plans cover about 2 years, so try a later "History from" date.`);
+    if(!r.ok) throw new UserErr(`Massive returned an error (${r.status})${msg?': '+msg:''}. Try again in a minute.`);
+    return j;
+  }
+  throw new UserErr('Massive kept rate-limiting the requests. Wait a minute and try again.');
+}
+async function fetchBars(t, from, to){
+  const path=`/v2/aggs/ticker/${encodeURIComponent(t)}/range/1/day/${from}/${to}`;
+  let url=`${API}${path}?adjusted=true&sort=asc&limit=50000`, bars=[];
+  while(url){ const j=await massiveGet(url); for(const b of (j.results||[])) bars.push([b.t,b.o,b.h,b.l,b.c]); url=j.next_url||null; }
+  return {bars, endpoint:'GET '+path};
+}
+async function pull(tickers, opts={}){
+  if(BUSY) return; if(!KEY){ setStatus('Connect your Massive API key first.','err'); $('#apiKey').focus(); return false; }
+  const from=$('#pullFrom').value, to=$('#pullTo').value;
+  if(!from||!to||from>=to){ setStatus('Pick a "History from" date that is before the "To" date.','err'); return false; }
+  BUSY=true; setBusy(true); let ok=0, firstNew=null; const skipped=[];
+  try{
+    for(const t of tickers){
+      setStatus(`Pulling ${t} from Massive…`);
+      const {bars, endpoint}=await fetchBars(t, from, to);
+      if(bars.length<30){ skipped.push(t); continue; }
+      if(!STORE.tickers[t]) STORE.order.push(t);
+      STORE.tickers[t]={endpoint, bars, pulled:today()}; ok++; if(!firstNew) firstNew=t;
+      saveStore(); renderChips();
+    }
+    const skipMsg = skipped.length ? ` No usable data for ${skipped.join(', ')}. Check the symbol or widen the dates.` : '';
+    if(!ok){ setStatus(skipMsg.trim(),'err'); return false; }
+    if(ok){ setStatus(`Pulled ${ok} ticker${ok>1?'s':''} from Massive.`+skipMsg, skipped.length?'err':'ok'); if(!opts.keepActive || !STORE.tickers[ACTIVE]) selectTicker(firstNew); else selectTicker(ACTIVE); }
+    return ok>0;
+  }catch(e){ setStatus(e instanceof UserErr ? e.message : 'Something went wrong while pulling data. Try again.','err'); return false; }
+  finally{ BUSY=false; setBusy(false); }
+}
+function setBusy(b){ ['#connectBtn','#addBtn','#refreshBtn'].forEach(s=>$(s).disabled=b); }
+function renderChips(){
+  $('#chips').innerHTML=STORE.order.map(t=>`<span class="chip${t===ACTIVE?' active':''}"><button type="button" data-t="${t}" aria-pressed="${t===ACTIVE}">${t}</button><button type="button" class="x" data-x="${t}" aria-label="Remove ${t}">×</button></span>`).join('');
+  const sugg=QUICK.filter(t=>!STORE.tickers[t]).slice(0,5);
+  $('#quick').innerHTML= sugg.length ? '<span>Quick add:</span>'+sugg.map(t=>`<button type="button" data-q="${t}">+ ${t}</button>`).join('') : '';
+}
+function selectTicker(t){
+  const d=STORE.tickers[t]; if(!d) return; ACTIVE=t; LS.set('bb.active',t); renderChips();
+  const {bars,checks}=cleanBars(d.bars.map(([t2,o,h,l,c])=>({t:t2,o,h,l,c}))); $('#tickerWrap').hidden=true;
+  setData(bars,t,checks,{kind:'massive',endpoint:d.endpoint,pulled:d.pulled});
+}
+function removeTicker(t){ delete STORE.tickers[t]; STORE.order=STORE.order.filter(x=>x!==t); saveStore();
+  if(ACTIVE===t){ ACTIVE=STORE.order[0]||''; if(ACTIVE) selectTicker(ACTIVE); else loadDemo(); } renderChips(); renderConn(); }
+function renderConn(){
+  const has=STORE.order.length>0;
+  $('#connectForm').hidden=!!KEY;
+  $('#connectLabel').textContent = has ? 'Connect your Massive key to add or update tickers' : 'Connect your Massive account';
+  $('#dataMgr').hidden=!(KEY||has);
+  $('#disconnect').hidden=!(KEY||has);
+  $('#connState').textContent = KEY ? 'Connected' : has ? 'Saved data' : 'Demo data';
+  $('#connState').classList.toggle('on', !!KEY);
+}
+function parseTickers(v){ return [...new Set(v.toUpperCase().split(/[\s,;]+/).map(x=>x.trim()).filter(x=>/^[A-Z0-9.\-:]{1,12}$/.test(x)))]; }
+function loadSpy(){ if(STORE.order.length) selectTicker(STORE.tickers[ACTIVE]?ACTIVE:STORE.order[0]); else loadDemo(); }
+
+$('#connectForm').addEventListener('submit', async ev=>{ ev.preventDefault();
+  const k=$('#apiKey').value.trim(); if(!k){ setStatus('Paste your Massive API key first.','err'); return; }
+  const want=parseTickers($('#firstTicker').value); if(!want.length) want.push('SPY');
+  KEY=k; renderConn(); const ok=await pull(want); if(!ok){ KEY=''; renderConn(); return; }
+  if(STORE.tickers[want[0]]) selectTicker(want[0]);
+  if($('#rememberKey').checked) LS.set('bb.key',KEY); $('#apiKey').value=''; renderConn();
+});
+$('#addForm').addEventListener('submit', async ev=>{ ev.preventDefault(); const list=parseTickers($('#addTicker').value);
+  if(!list.length){ setStatus('Type a ticker symbol, like NVDA or QQQ.','err'); return; }
+  const need=list.filter(t=>!STORE.tickers[t]);
+  if(need.length){ if(!KEY){ setStatus(`Connect your Massive API key to pull ${need.join(', ')}.`,'err'); $('#apiKey').focus(); return; } await pull(need); }
+  if(STORE.tickers[list[0]]){ selectTicker(list[0]); $('#addTicker').value=''; if(!need.length) setStatus(`Testing ${list[0]}.`,'ok'); } });
+$('#chips').addEventListener('click', ev=>{ const b=ev.target.closest('button'); if(!b||BUSY) return; if(b.dataset.x) removeTicker(b.dataset.x); else if(b.dataset.t) selectTicker(b.dataset.t); });
+$('#quick').addEventListener('click', ev=>{ const b=ev.target.closest('button[data-q]'); if(b) pull([b.dataset.q]); });
+$('#refreshBtn').onclick=()=>{ LS.set('bb.range',{from:$('#pullFrom').value,to:$('#pullTo').value}); if(STORE.order.length) pull([...STORE.order],{keepActive:true}); else setStatus('Add a ticker first.','err'); };
+['#pullFrom','#pullTo'].forEach(s=>$(s).addEventListener('change',()=>LS.set('bb.range',{from:$('#pullFrom').value,to:$('#pullTo').value})));
+$('#disconnect').onclick=()=>{ KEY=''; STORE={order:[],tickers:{}}; ACTIVE=''; ['bb.key','bb.data','bb.active'].forEach(LS.del); renderChips(); renderConn(); loadDemo(); setStatus('Disconnected. Your key and saved prices were removed from this browser.'); };
+(function initConn(){ const r=defaultRange(); $('#pullFrom').value=r.from; $('#pullTo').value=r.to; $('#pullTo').max=today(); renderChips(); renderConn(); })();
 
 /* ---------- Strategy cards ---------- */
 function buildCards(){
@@ -531,3 +699,5 @@ let rw; window.addEventListener('resize',()=>{ clearTimeout(rw); rw=setTimeout((
 loadSpy();
 })();
 </script>
+</body>
+</html>

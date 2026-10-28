@@ -6,45 +6,28 @@ Backtest Bench tests three classic trading strategies on real daily stock prices
 
 ## Get started
 
-You have three ways in. Pick the one that suits you.
+1. **Download.** Click the green **Code** button above, then **Download ZIP**.
+2. **Unzip.** On Windows, right-click the ZIP and choose **Extract All**. On a Mac, double-click it.
+3. **Open the app.** Double-click **`index.html`** in the unzipped folder. It opens in your web browser on simulated demo prices.
+4. **Connect Massive and pick a ticker.** In the **Data source** box at the top right, paste your Massive API key, type the **Ticker to test** (SPY is filled in), and click **Connect and test**. You don't have a key yet? [Sign up free](https://massive.com/dashboard/signup), then copy it from [your keys page](https://massive.com/dashboard/keys).
+5. **Test more tickers.** Type any symbol, such as `NVDA`, in **Ticker to test** and click **Test**. Every ticker you pull stays under **Your tickers**, so you can click between them. To pull a different date range, change **History from** and **To**, then click **Update all**.
 
-### Option 1: Let an AI assistant set it up for you (easiest)
+That's all. Nothing to install, and no terminal. Your key and the prices you pull stay saved in that browser, so next time just double-click `index.html` again.
 
-1. On this GitHub page, click the green **Code** button, then **Download ZIP**.
-2. Open a chat with Claude, ChatGPT or another AI assistant and attach the ZIP file.
-3. Type: **"Please install this for me by following INSTALL_WITH_AI.md."**
+Free Massive plans cover about 2 years of history and about 5 requests a minute. If you add many tickers at once, the app waits and continues on its own.
 
-The assistant walks you through each step, or runs the steps itself if it can work on your computer. Never paste your API key into the chat. The setup asks for it privately on your computer.
+### Prefer an AI assistant to walk you through it?
 
-### Option 2: Set it up yourself (about 5 minutes)
-
-1. **Download.** Click the green **Code** button, then **Download ZIP**.
-2. **Unzip.**
-   - Windows: right-click the ZIP and choose **Extract All**. Double-clicking only previews the files, and the setup won't run from inside the preview.
-   - Mac: double-click the ZIP.
-3. **Get a free Massive API key.** Sign up at [massive.com/dashboard/signup](https://massive.com/dashboard/signup), then copy your key from [massive.com/dashboard/keys](https://massive.com/dashboard/keys).
-4. **Run the setup.** Open the unzipped folder and double-click:
-   - Windows: **`start-windows.bat`**. If Windows shows "Windows protected your PC", click **More info**, then **Run anyway**.
-   - Mac: **`start-mac.command`**. If your Mac says it can't be opened, right-click the file, choose **Open**, then click **Open** again.
-5. **Answer the questions.** Paste your key when asked; nothing appears on screen as you paste, and that's normal. Choose your tickers, or press Enter for SPY, QQQ and AAPL. Then choose how many years, or press Enter for 2.
-6. Backtest Bench opens in your browser. To come back later, double-click **`index.html`** in the folder. To pull fresh prices or new tickers, run the start file again.
-
-If the setup says Python is missing, install it from [python.org/downloads](https://www.python.org/downloads/). On Windows, tick **"Add python.exe to PATH"** on the installer's first screen. Then run the start file again.
-
-### Option 3: Just look around
-
-Double-click `index.html`. Without Massive data it runs on simulated prices, clearly labeled as such, so you can explore the tool before getting a key.
+Attach the ZIP to a chat with Claude, ChatGPT or another assistant and say **"Please help me set this up by following INSTALL_WITH_AI.md."** Never paste your API key into the chat. It goes into the app's Connect box.
 
 ### For developers
 
+The app is a single static file. It calls `https://api.massive.com/v2/aggs/ticker/{T}/range/1/day/{from}/{to}` straight from the browser and caches the bars in `localStorage`. To pre-load data from the command line instead, `get_data.py` (Python standard library only) writes `data/market-data.js`, which the page merges in on load:
+
 ```bash
-git clone https://github.com/ybendiks/backtest-bench.git
-cd backtest-bench
 export MASSIVE_API_KEY=your_key          # or copy .env.example to .env
 python3 get_data.py --tickers SPY,QQQ,NVDA --years 2
 ```
-
-`get_data.py` uses only the Python standard library, so there's nothing to install. It writes `data/market-data.js`, which `index.html` loads with a plain `<script>` tag, so the app works straight from `file://`.
 
 ## The strategies
 
@@ -68,20 +51,21 @@ You can change every setting in the app, and the results update as you type. You
 
 ## Your API key and data
 
-- Your key is stored only in a `.env` file inside this folder, and only if you choose to save it. That file is listed in `.gitignore`, so it never gets uploaded to GitHub. The key is never written into `index.html` or the data file.
-- Prices you pull are saved to `data/market-data.js`, which is also excluded from git. Massive's terms limit redistributing their data, so keep that file on your own machine.
+- The app sends your key only to Massive. If you leave **Remember on this computer** ticked, the key is also saved in your browser's local storage on that computer. Untick it to keep the key only until you close the tab.
+- The prices you pull are saved in the same browser so the app opens instantly next time. **Disconnect and clear saved data** removes both the key and the prices.
+- Nothing is ever uploaded anywhere else. The repo contains no keys and no Massive data, and `.gitignore` keeps `.env` and `data/market-data.js` out of git if you use the command-line script.
 - If you ever share your key by accident, regenerate it at [massive.com/dashboard/keys](https://massive.com/dashboard/keys).
 
 ## Troubleshooting
 
 | What you see | What to do |
 |---|---|
-| "Python is not installed" | Install it from [python.org/downloads](https://www.python.org/downloads/). On Windows, tick "Add python.exe to PATH". |
-| "Massive refused the request (401/403)" | The key is wrong, or your plan doesn't cover that much history. Try 2 years. To enter a new key, delete `.env` and run the setup again. |
-| "Waiting 20 seconds…" | Free plans allow about 5 requests a minute. The script waits and continues on its own. |
-| "CERTIFICATE_VERIFY_FAILED" (Mac) | Open Applications > Python 3.x and double-click "Install Certificates.command". |
-| The page shows "Demo mode" | The setup hasn't saved any data yet. Run the start file again and watch for errors. |
-| A ticker returns no bars | Check the symbol. Massive uses exchange tickers such as `BRK.B`. |
+| "Massive didn't accept this API key" | Copy the key again from [your keys page](https://massive.com/dashboard/keys) and paste it into Connect. |
+| "Massive declined the request" | Your plan doesn't cover those dates. Free plans cover about 2 years, so move **History from** later and click **Update all**. |
+| "Trying again in 20s…" | Free plans allow about 5 requests a minute. Leave the page open and it continues on its own. |
+| "No usable data for XYZ" | Check the symbol. Massive uses exchange tickers such as `BRK.B`. |
+| "Your browser couldn't reach Massive" | Check your internet connection. Office networks sometimes block API sites. Try another network. |
+| The page asks for the key every time | Your browser may be clearing site data, or you're in a private window. Leave "Remember on this computer" ticked and use a normal window. |
 
 ## Disclaimer
 
