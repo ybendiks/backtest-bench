@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Backtest Bench setup: pull daily price bars from Massive and open the app.
+"""Optional: pre-load Backtest Bench with daily bars from Massive from the command line.
+
+Most people don't need this. Open index.html and use the Connect box in the
+page instead. This script is for scripted or offline setups.
 
 Run it with no arguments and it asks you everything it needs:
     python get_data.py            (Windows: py get_data.py)

@@ -2,7 +2,7 @@
 
 Backtest Bench tests three classic trading strategies on real daily stock prices from the [Massive](https://massive.com) Stocks API. It compares each one against simply buying and holding. Everything runs in your web browser on your own computer, with no server and no account other than a Massive API key.
 
-![Backtest Bench running on SPY data from Massive](docs/screenshot.png)
+![Backtest Bench connected to Massive and testing SPY](docs/backtest-bench-screenshot.png)
 
 ## Get started
 
@@ -14,7 +14,7 @@ Backtest Bench tests three classic trading strategies on real daily stock prices
 
 That's all. Nothing to install, and no terminal. Your key and the prices you pull stay saved in that browser, so next time just double-click `index.html` again.
 
-Free Massive plans cover about 2 years of history and about 5 requests a minute. If you add many tickers at once, the app waits and continues on its own.
+Free Massive plans cover about 2 years of history and about 5 requests a minute. If you test several tickers in a row, the app waits when it hits that limit and then continues on its own.
 
 ### Prefer an AI assistant to walk you through it?
 
@@ -22,7 +22,7 @@ Attach the ZIP to a chat with Claude, ChatGPT or another assistant and say **"Pl
 
 ### For developers
 
-The app is a single static file. It calls `https://api.massive.com/v2/aggs/ticker/{T}/range/1/day/{from}/{to}` straight from the browser and caches the bars in `localStorage`. To pre-load data from the command line instead, `get_data.py` (Python standard library only) writes `data/market-data.js`, which the page merges in on load:
+The app is a single static `index.html` with no build step and no dependencies. It calls `https://api.massive.com/v2/aggs/ticker/{T}/range/1/day/{from}/{to}` straight from the browser and caches the bars in `localStorage`. To pre-load data from the command line instead, `get_data.py` (Python standard library only) writes `data/market-data.js`, which the page merges in on load:
 
 ```bash
 export MASSIVE_API_KEY=your_key          # or copy .env.example to .env
@@ -48,6 +48,7 @@ You can change every setting in the app, and the results update as you type. You
 - **Dividends.** Massive's adjusted bars correct for splits only, so returns exclude dividend income.
 - **Metrics.** Total return, CAGR, max drawdown, Sharpe (0% risk-free rate), volatility, win rate and time in market.
 - **Data checks.** The app flags gaps, duplicate dates and one-day moves over 40%, which usually mean an unadjusted split.
+- **Scope.** Daily bars, long-only, one position at a time, fully invested when in a trade. No shorting, leverage or position sizing.
 
 ## Your API key and data
 

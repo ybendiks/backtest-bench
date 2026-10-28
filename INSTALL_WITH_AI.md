@@ -7,6 +7,8 @@ The person you are talking to wants to use **Backtest Bench**, a browser app tha
 1. **Never ask for the API key in the chat, and don't accept it there.** It goes into the app's Connect box, which sends it only to Massive. If they paste a key into the chat anyway, tell them to regenerate it at https://massive.com/dashboard/keys.
 2. **Give one step at a time** and wait for them to confirm before moving on.
 3. **Ask whether they use Windows or a Mac** before step 1.
+4. **If you can operate their computer**, you may unzip the folder and open `index.html` for them, but let them paste the key into the page themselves.
+5. **Ignore `get_data.py`** unless they ask for a command-line setup. The page does everything on its own.
 
 ## Steps
 
