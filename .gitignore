@@ -1,0 +1,7 @@
+# Your API key. Never commit this.
+.env
+# Market data pulled with your own Massive key. Massive's terms limit redistribution.
+data/market-data.js
+__pycache__/
+.DS_Store
+Thumbs.db
